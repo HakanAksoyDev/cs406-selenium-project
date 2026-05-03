@@ -1,13 +1,10 @@
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 class BasePage:
-    """
-    Base class for all Page Objects.
-    Contains shared utilities like waiting, clicking, and popup handling.
-    """
+    """Base class for shared Page Object utilities."""
 
     BASE_URL = "https://automationexercise.com"
 
@@ -20,7 +17,7 @@ class BasePage:
         self.close_popups_if_any()
 
     def close_popups_if_any(self):
-        """Attempts to close any modal/popup that might block interactions."""
+        """Close visible modal or consent controls that might block clicks."""
         possible_popup_selectors = [
             (By.CSS_SELECTOR, ".fc-close"),
             (By.CSS_SELECTOR, ".fc-button-label"),
@@ -30,6 +27,7 @@ class BasePage:
             (By.CSS_SELECTOR, "[id*='close']"),
             (By.CSS_SELECTOR, "[class*='close']"),
         ]
+
         for by, locator in possible_popup_selectors:
             elements = self.driver.find_elements(by, locator)
             for element in elements:
@@ -38,10 +36,10 @@ class BasePage:
                         self.driver.execute_script("arguments[0].click();", element)
                         return
                 except Exception:
-                    pass
+                    continue
 
     def js_click(self, element):
-        """Click via JavaScript — useful when normal click is intercepted."""
+        """Click via JavaScript when a normal click is intercepted."""
         self.driver.execute_script("arguments[0].click();", element)
 
     def wait_for_url(self, url_fragment):
