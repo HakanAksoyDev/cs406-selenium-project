@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+
 from pages.base_page import BasePage
 
 
@@ -15,29 +16,15 @@ def _xpath_literal(text):
 class CartPage(BasePage):
     """Page Object for the Shopping Cart page."""
 
-    CART_HEADING    = (
+    CART_HEADING = (
         By.XPATH,
         "//*[self::h2 or self::li][contains(normalize-space(),'Shopping Cart')]",
     )
-    CART_ITEMS      = (By.XPATH, "//tbody/tr")
-    CART_PRODUCT_NAME = (By.XPATH, "//td[@class='cart_description']//h4/a")
-    EMPTY_CART_MSG  = (By.XPATH, "//span[@id='empty_cart']")
-    DELETE_BTN      = (By.XPATH, "//td[@class='cart_delete']/a")
+    EMPTY_CART_MSG = (By.XPATH, "//span[@id='empty_cart']")
 
     def is_cart_page(self):
-        elem = self.wait.until(EC.visibility_of_element_located(self.CART_HEADING))
-        return elem.is_displayed()
-
-    def get_cart_item_count(self):
-        try:
-            items = self.driver.find_elements(*self.CART_ITEMS)
-            return len(items)
-        except Exception:
-            return 0
-
-    def get_product_names_in_cart(self):
-        elems = self.driver.find_elements(*self.CART_PRODUCT_NAME)
-        return [e.text for e in elems]
+        heading = self.wait.until(EC.visibility_of_element_located(self.CART_HEADING))
+        return heading.is_displayed()
 
     def _product_row_locator(self, product_name):
         name_literal = _xpath_literal(product_name)
@@ -59,16 +46,15 @@ class CartPage(BasePage):
 
     def get_product_quantity(self, product_name):
         row = self.get_product_row(product_name)
-        return row.find_element(By.XPATH, ".//td[contains(@class,'cart_quantity')]//*[self::button or self::span]").text.strip()
+        quantity = row.find_element(
+            By.XPATH,
+            ".//td[contains(@class,'cart_quantity')]//*[self::button or self::span]",
+        )
+        return quantity.text.strip()
 
     def is_cart_empty(self):
         try:
-            msg = self.wait.until(EC.visibility_of_element_located(self.EMPTY_CART_MSG))
-            return msg.is_displayed()
+            message = self.wait.until(EC.visibility_of_element_located(self.EMPTY_CART_MSG))
+            return message.is_displayed()
         except Exception:
             return False
-
-    def remove_first_item(self):
-        btns = self.driver.find_elements(*self.DELETE_BTN)
-        if btns:
-            self.js_click(btns[0])
