@@ -58,6 +58,7 @@ class TestCart:
 
         home.go_to_products()
         products = ProductsPage(driver)
+        products.search("Blue Top")
         assert products.is_searched_products_visible()
         assert products.is_product_in_results("Blue Top")
 
